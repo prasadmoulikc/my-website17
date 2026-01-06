@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>{{ status }}</h2>
+  <p>{{ reason }}</p>
+  <ul>
+    {% for s in steps %}
+    <li>{{ s }}</li>
+    {% endfor %}
+  </ul>
+  <a href="/">Decide again</a>
+</div>
+{% endblock %}

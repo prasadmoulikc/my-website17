@@ -1,27 +1,19 @@
 {% extends "base.html" %}
-
-{% block title %}Home{% endblock %}
-
 {% block content %}
-<h1>Add Post</h1>
+<form method="post" action="/decide" class="card">
+  <h2>What should I do?</h2>
 
-<form action="/create"
-method="POST">
-<input type="text"
-name="title" placeholder="Title"required>
-<textarea name="content"
-placeholder="Write something..."
-required></textarea>
-<button type="submit">post</button>
+  <select name="stage" required>
+    <option value="">Your stage</option>
+    <option>School</option>
+    <option>College</option>
+    <option>Graduate</option>
+    <option>Career Switch</option>
+  </select>
+
+  <textarea name="problem" required placeholder="Explain your confusion..."></textarea>
+
+  <button>Help me decide</button>
 </form>
-
-{% for post in posts %}
-<div class="post">
-    <h2>{{ post.title }}</h2>
-    <p>{{ post.content }}</p>
-</div>
-
-</div>
-{% endfor %}
-
 {% endblock %}
+
