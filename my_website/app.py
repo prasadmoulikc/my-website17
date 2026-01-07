@@ -1,35 +1,31 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request
 import sqlite3
-from werkzeug.security import generate_password_hash, check_password_hash
+import ml_model
+from collections import Counter
 
 app = Flask(__name__)
-app.secret_key = "super-secret-key"
 
-# ---------- DATABASE ----------
-def get_db():
-    conn = sqlite3.connect("database.db")
-    conn.row_factory = sqlite3.Row
-    return conn
-
+# =========================
+# DATABASE
+# =========================
 def init_db():
-    conn = get_db()
+    conn = sqlite3.connect("database.db")
     cur = conn.cursor()
 
     cur.execute("""
-    CREATE TABLE IF NOT EXISTS users (
+    CREATE TABLE IF NOT EXISTS memory (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE,
-        password TEXT
+        question TEXT,
+        mood TEXT
     )
     """)
 
     cur.execute("""
-    CREATE TABLE IF NOT EXISTS decisions (
+    CREATE TABLE IF NOT EXISTS feedback (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        stage TEXT,
-        problem TEXT,
-        result TEXT
+        question TEXT,
+        mood TEXT,
+        rating INTEGER
     )
     """)
 
@@ -38,138 +34,124 @@ def init_db():
 
 init_db()
 
-# ---------- SMART DECISION LOGIC ----------
-def decision_engine(stage, text):
-    text = text.lower()
+# =========================
+# AI LOGIC
+# =========================
+def generate_sections(question, mood):
+    q = question.lower()
 
-    risk = 0
-    urgency = 0
-    clarity = 5
+    if "exam" in q:
+        return {
+            "overview": "Exam stress is common and manageable.",
+            "options": "Better planning and focus techniques.",
+            "pros_cons": "Pros: clarity. Cons: discipline required.",
+            "next_steps": "Make a 7-day revision plan."
+        }
 
-    danger_words = ["loan", "fees", "money", "pay", "quick", "fast", "guarantee"]
-    confusion_words = ["confused", "lost", "scared", "panic", "dont know"]
+    if "career" in q or "future" in q:
+        return {
+            "overview": "Career confusion means you care about your future.",
+            "options": "Explore interests, skills, and exposure.",
+            "pros_cons": "Pros: clarity. Cons: takes time.",
+            "next_steps": "Shortlist two paths."
+        }
 
-    for w in danger_words:
-        if w in text:
-            risk += 2
-            urgency += 1
+    return {
+        "overview": "This is a thoughtful question.",
+        "options": "Break it into smaller steps.",
+        "pros_cons": "Pros: less stress. Cons: slower progress.",
+        "next_steps": "Take one action today."
+    }
 
-    for w in confusion_words:
-        if w in text:
-            clarity -= 2
-
-    if "degree" in text and "skill" in text:
-        return (
-            "Balanced Path Recommended",
-            "You are stuck between degree and skills. Both matter, timing matters more.",
-            [
-                "Continue your education if already enrolled",
-                "Start ONE practical skill alongside",
-                "Avoid expensive courses now",
-                "Review after 30 days"
-            ]
-        )
-
-    if clarity <= 1:
-        return (
-            "Pause & Simplify",
-            "Your mind is overloaded. You need clarity, not pressure.",
-            [
-                "Stop consuming random advice",
-                "Pick ONE small goal",
-                "Avoid irreversible decisions",
-                "Re-evaluate in 2 weeks"
-            ]
-        )
-
-    if risk >= 4:
-        return (
-            "High Risk – Avoid",
-            "This situation has financial or urgency risk.",
-            [
-                "Do NOT spend money now",
-                "Verify with trusted sources",
-                "Delay decision by 7 days"
-            ]
-        )
-
-    return (
-        "Safe to Proceed Slowly",
-        "No immediate danger detected. Move step by step.",
-        [
-            "Research from official sources",
-            "Take small actions only",
-            "Track progress weekly"
-        ]
-    )
-
-# ---------- ROUTES ----------
+# =========================
+# ROUTES
+# =========================
 @app.route("/")
 def home():
     return render_template("index.html")
 
-@app.route("/decide", methods=["POST"])
-def decide():
-    stage = request.form["stage"]
-    problem = request.form["problem"]
 
-    status, reason, steps = decision_engine(stage, problem)
+@app.route("/ask", methods=["POST"])
+def ask():
+    question = request.form["question"]
+    mood = request.form["mood"]
 
-    if "user_id" in session:
-        conn = get_db()
-        conn.execute(
-            "INSERT INTO decisions (user_id, stage, problem, result) VALUES (?, ?, ?, ?)",
-            (session["user_id"], stage, problem, status)
-        )
-        conn.commit()
-        conn.close()
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO memory (question, mood) VALUES (?, ?)",
+        (question, mood)
+    )
+    conn.commit()
+    conn.close()
+
+    sections = generate_sections(question, mood)
+    confidence = ml_model.predict_quality(question)
 
     return render_template(
-        "result.html",
-        status=status,
-        reason=reason,
-        steps=steps
+        "answer.html",
+        question=question,
+        mood=mood,
+        sections=sections,
+        confidence=confidence
     )
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        email = request.form["email"]
-        password = generate_password_hash(request.form["password"])
 
-        conn = get_db()
-        conn.execute(
-            "INSERT INTO users (email, password) VALUES (?, ?)",
-            (email, password)
-        )
-        conn.commit()
-        conn.close()
-        return redirect("/login")
+@app.route("/feedback", methods=["POST"])
+def feedback():
+    rating = int(request.form["rating"])
+    question = request.form["question"]
+    mood = request.form["mood"]
 
-    return render_template("register.html")
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO feedback (question, mood, rating) VALUES (?, ?, ?)",
+        (question, mood, rating)
+    )
+    conn.commit()
+    conn.close()
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
+    ml_model.train_model()
+    return "Feedback saved"
 
-        conn = get_db()
-        user = conn.execute(
-            "SELECT * FROM users WHERE email = ?", (email,)
-        ).fetchone()
-        conn.close()
 
-        if user and check_password_hash(user["password"], password):
-            session["user_id"] = user["id"]
-            return redirect("/")
+# =========================
+# ADMIN DASHBOARD
+# =========================
+@app.route("/admin")
+def admin():
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
 
-    return render_template("login.html")
+    cur.execute("SELECT rating FROM feedback")
+    ratings = [r[0] for r in cur.fetchall()]
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/")
+    cur.execute("SELECT mood FROM memory")
+    moods = [m[0] for m in cur.fetchall()]
 
+    cur.execute("SELECT question FROM memory ORDER BY id DESC LIMIT 10")
+    questions = [q[0] for q in cur.fetchall()]
+
+    conn.close()
+
+    feedback_counts = [
+        ratings.count(5),
+        ratings.count(3),
+        ratings.count(1)
+    ]
+
+    mood_counts = dict(Counter(moods))
+
+    return render_template(
+        "admin.html",
+        feedback=feedback_counts,
+        moods=mood_counts,
+        questions=questions
+    )
+
+# =========================
+# RUN
+# =========================
 if __name__ == "__main__":
     app.run(debug=True)

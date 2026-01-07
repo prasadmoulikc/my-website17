@@ -1,13 +1,18 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="card">
-  <h2>{{ status }}</h2>
-  <p>{{ reason }}</p>
-  <ul>
-    {% for s in steps %}
-    <li>{{ s }}</li>
-    {% endfor %}
-  </ul>
-  <a href="/">Decide again</a>
-</div>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Result</title>
+</head>
+<body>
+
+    <h3>Your Question</h3>
+    <p>{{ question }}</p>
+
+    <h3>AI Answer</h3>
+    <p>{{ answer }}</p>
+
+    <a href="/">Ask Again</a>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/static/style.css">
+<title>Answer | NextStep AI</title>
+</head>
+
+<body>
+<div class="card">
+
+<h3>Your Question</h3>
+<p>{{ question }}</p>
+
+<h4>Mood: {{ mood }}</h4>
+
+<hr>
+
+<h3>Overview</h3>
+<p>{{ sections.overview }}</p>
+
+<h3>Options</h3>
+<p>{{ sections.options }}</p>
+
+<h3>Pros / Cons</h3>
+<p>{{ sections.pros_cons }}</p>
+
+<h3>Next Steps</h3>
+<p>{{ sections.next_steps }}</p>
+
+<div class="meter">
+Confidence:
+{% if confidence == "high" %}
+🟢 High
+{% elif confidence == "medium" %}
+🟡 Medium
+{% else %}
+🔴 Low
+{% endif %}
+</div>
+
+<form method="POST" action="/feedback">
+  <input type="hidden" name="question" value="{{ question }}">
+  <input type="hidden" name="mood" value="{{ mood }}">
+
+  <button name="rating" value="5">⭐ Helpful</button>
+  <button name="rating" value="3">🙂 Okay</button>
+  <button name="rating" value="1">😐 Not useful</button>
+</form>
+
+<a href="/">⬅ Ask another question</a>
+
+</div>
+</body>
+</html>

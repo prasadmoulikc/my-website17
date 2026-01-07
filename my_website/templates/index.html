@@ -1,19 +1,44 @@
-{% extends "base.html" %}
-{% block content %}
-<form method="post" action="/decide" class="card">
-  <h2>What should I do?</h2>
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/static/style.css">
+<title>NextStep AI</title>
+</head>
 
-  <select name="stage" required>
-    <option value="">Your stage</option>
-    <option>School</option>
-    <option>College</option>
-    <option>Graduate</option>
-    <option>Career Switch</option>
+<body>
+<div class="card">
+
+<h1>✨ NextStep AI</h1>
+<p>Make calm, confident decisions about your future.</p>
+
+<div class="quick">
+  <button onclick="fill('How should I plan for exams?')">📘 Exam Stress</button>
+  <button onclick="fill('Which career suits me?')">🧭 Career Choice</button>
+  <button onclick="fill('How do I choose my future?')">🚀 Future</button>
+  <button onclick="fill('How can I improve myself?')">🛠 Growth</button>
+</div>
+
+<form method="POST" action="/ask">
+  <input id="q" name="question" placeholder="Ask your question..." required>
+
+  <select name="mood">
+    <option>Calm</option>
+    <option>Confused</option>
+    <option>Stressed</option>
+    <option>Motivated</option>
   </select>
 
-  <textarea name="problem" required placeholder="Explain your confusion..."></textarea>
-
-  <button>Help me decide</button>
+  <button type="submit">Ask AI</button>
 </form>
-{% endblock %}
 
+</div>
+
+<script>
+function fill(text){
+  document.getElementById("q").value = text;
+}
+</script>
+
+</body>
+</html>

@@ -1,6 +1,119 @@
-body { font-family: system-ui; background:#f4f6f8; margin:0 }
-header { background:#0a2540; color:white; padding:20px; text-align:center }
-nav a { color:white; margin:0 10px; text-decoration:none }
-.card { background:white; max-width:500px; margin:30px auto; padding:20px; border-radius:8px }
-textarea, select, input { width:100%; margin:10px 0; padding:10px }
-button { background:#0a2540; color:white; padding:12px; width:100%; border:none }
+:root {
+  --bg1: #0f2027;
+  --bg2: #203a43;
+  --bg3: #2c5364;
+  --accent: #00e6e6;
+  --card-bg: rgba(0, 0, 0, 0.65);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+  color: #ffffff;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 22px;
+  border-radius: 16px;
+  width: 92%;
+  max-width: 440px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+  animation: fadeUp 0.6s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h1, h3 {
+  margin-top: 0;
+}
+
+p {
+  line-height: 1.55;
+  opacity: 0.95;
+}
+
+input, select, button {
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+}
+
+input, select {
+  background: #ffffff;
+  color: #000;
+}
+
+button {
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+.quick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.quick button {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-weight: 600;
+}
+
+.quick button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.meter {
+  margin: 14px 0;
+  font-weight: 700;
+}
+
+a {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+pre {
+  white-space: pre-wrap;
+  line-height: 1.5;
+}

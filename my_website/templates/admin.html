@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard | NextStep AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="/static/style.css">
+
+  <style>
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .dashboard {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    canvas {
+      background: rgba(255,255,255,0.05);
+      padding: 12px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>🛠 Admin Dashboard</h1>
+    <p>System analytics overview</p>
+
+    <div class="dashboard">
+      <div>
+        <h2>📊 Feedback Ratings</h2>
+        <canvas id="feedbackChart"></canvas>
+      </div>
+
+      <div>
+        <h2>🧠 Mood Distribution</h2>
+        <canvas id="moodChart"></canvas>
+      </div>
+    </div>
+
+    <br>
+    <a href="/">⬅ Back to Home</a>
+  </div>
+
+  <!-- ✅ SAFE DATA INJECTION -->
+  <script>
+    const FEEDBACK_DATA = {{ feedback_counts | tojson }};
+    const MOOD_DATA = {{ mood_counts | tojson }};
+  </script>
+
+  <!-- ✅ ADMIN LOGIC -->
+  <script src="/static/admin.js"></script>
+
+</body>
+</html>
