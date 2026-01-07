@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 import sqlite3
-import ml_model
+from my_website import ml_model
 from collections import Counter
 
 app = Flask(__name__)
