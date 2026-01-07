@@ -1,3 +1,7 @@
-flask
-scikit-learn
+flask==3.0.o
 gunicorn
+scikit-learn
+numpay
+pandas
+gunicorn
+faiss-cpu
